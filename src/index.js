@@ -1,10 +1,6 @@
 'use strict'
 
 import validation from './validation'
-import * as sanitization from './sanitization'
-
-export validation
-export sanitization
 
 export class ValidateError {
     constructor(v, message) {

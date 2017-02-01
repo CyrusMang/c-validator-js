@@ -1,10 +1,9 @@
 'use strict'
 
 import assert from 'assert'
-import * as raw from '../../helpers/validator/raw'
-import Validator, {validate} from '../../helpers/validator'
-import validation, {ValidateError} from '../../helpers/validator/validation'
-import {multilingual, article} from '../../helpers/validator/plugin'
+import Validator, {validate, ValidateError} from '../'
+import * as raw from '../raw'
+import validation from '../validation'
 
 describe('validator', () => {
     describe('main', () => {
@@ -47,65 +46,6 @@ describe('validator', () => {
                         email: 'test@testing.com',
                         phone: ['62372424']
                     }
-                }
-                return Boolean(Validator(schema, value))
-            })
-        })
-    })
-    describe('plugin', () => {
-        describe('multilingual', () => {
-            const schema = {
-                display: multilingual({
-                    name: 'required'
-                })
-            }
-            it('should return a list of errors when value not multilingual data', () => {
-                const value = {
-                    display: {
-                        ewegweg: {
-                            name: 'testing'
-                        }
-                    }
-                }
-                try {
-                    Validator(schema, value)
-                } catch(e) {
-                    return Array.isArray(e)
-                }
-            })
-            it('should return true when value is multilingual data', () => {
-                const value = {
-                    display: {
-                        en: {
-                            name: 'testing'
-                        }
-                    }
-                }
-                return Boolean(Validator(schema, value))
-            })
-        })
-        describe('article', () => {
-            const schema = {
-                article: article('required')
-            }
-            it('should return a list of errors when value not article data', () => {
-                const value = {
-                    article: [
-                        ['test', 'About']
-                    ]
-                }
-                try {
-                    Validator(schema, value)
-                } catch(e) {
-                    return Array.isArray(e)
-                }
-            })
-            it('should return true when value is article data', () => {
-                const value = {
-                    article: [
-                        ['h1', 'About'],
-                        ['p', 'text']
-                    ]
                 }
                 return Boolean(Validator(schema, value))
             })
