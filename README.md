@@ -1,7 +1,7 @@
 # c-validator-js
 Validating and sanitizing data
 
-    import Validator, {ValidateError} from 'c-validator-js'
+    import Validator from 'c-validator-js'
     
     const valid = (data) => {
         const schema = {
@@ -14,7 +14,7 @@ Validating and sanitizing data
         try {
             Validator(schema, data)
         } catch(e) {
-            if (e instanceof ValidateError) {
+            if (Array.isArray(e)) {
                 console.error(e)
                 return false
             }
