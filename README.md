@@ -1,9 +1,9 @@
 # c-validator-js
 Validating and sanitizing data
 
-    import Validator from 'c-validator-js'
+    import Validate from 'c-validator-js'
     
-    const valid = (data) => {
+    const v = (data) => {
         const schema = {
             name: 'required',
             slug: 'required|slug',
@@ -12,7 +12,7 @@ Validating and sanitizing data
             }
         }
         try {
-            Validator(schema, data)
+            Validate(schema, data)
         } catch(e) {
             if (Array.isArray(e)) {
                 console.error(e)
@@ -24,7 +24,7 @@ Validating and sanitizing data
     }
     
     // true
-    console.log(valid({
+    console.log(v({
         name: 'Test',
         slug: 'name-test',
         contact: {
@@ -33,7 +33,7 @@ Validating and sanitizing data
     }))
     
     // false
-    console.log(valid({
+    console.log(v({
         slug: 'name-test',
         contact: 'not valid'
     }))
