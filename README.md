@@ -1,7 +1,7 @@
 # c-validator-js
 Validating and sanitizing data
 
-    import Validate from 'c-validator-js'
+    import Validate from 'c-validator'
     
     const v = (data) => {
         const schema = {
