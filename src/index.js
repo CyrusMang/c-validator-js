@@ -53,9 +53,10 @@ export const validate = (n, s, _value) => {
 
 export default (schema, value) => {
     let errors = []
+    let _value = {}
     for (let [name, rule] of Object.entries(schema)) {
         try {
-            value[name] = validate(name, rule, value ? value[name] : null)
+            _value[name] = validate(name, rule, value ? value[name] : null)
         } catch(e) {
             if (Array.isArray(e)) {
                 errors.push(e)
@@ -67,5 +68,5 @@ export default (schema, value) => {
     if (errors.length) {
         throw errors
     }
-    return value
+    return _value
 }
