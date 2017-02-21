@@ -14,7 +14,7 @@ validation.required = (value) => {
 }
 
 validation.in = (value, args) => {
-    args = args ? args.split(',') : []
+    args = typeof args === 'string' ? args.split(',') : (args || [])
     if (!raw.empty(value)) {
         if (!args.includes(value)) {
             throw new ValidateError('in', '{name} not in option')
