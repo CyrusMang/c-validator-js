@@ -14,6 +14,7 @@ validation.required = (value) => {
 }
 
 validation.in = (value, args) => {
+    args = args ? args.split(',') : []
     if (!raw.empty(value)) {
         if (!args.includes(value)) {
             throw new ValidateError('in', '{name} not in option')
@@ -24,7 +25,7 @@ validation.in = (value, args) => {
 
 validation.regex = (value, re) => {
     if (!raw.empty(value)) {
-        if (!new RegExp(re[0]).test(value)) {
+        if (!new RegExp(re).test(value)) {
             throw new ValidateError('regex', '{name} not valid')
         }
     }

@@ -21,7 +21,7 @@ export const validate = (n, s, _value) => {
             _value = _value && escape(_value)
             for (let v of s.split('|')) {
                 let _v = v.split(':')
-                _value = validation[_v[0]](_value, _v[1] ? _v[1].split(',') : [])
+                _value = validation[_v[0]](_value, _v[1])
             }
         } catch(e) {
             throw e instanceof ValidateError ? [n, e] : e
