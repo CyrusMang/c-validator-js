@@ -45,4 +45,28 @@ validation.slug = (value) => {
     return value
 }
 
+validation.phone = (value) => {
+    if (!raw.empty(value)) {
+        if (/^\d+$/.test(value)) {
+            return value
+        }
+        throw new ValidateError('phone', '{name} not valid phone')
+    }
+    return value
+}
+
+validation.email = (value) => {
+    if (!raw.empty(value)) {
+        if (typeof value == 'string') {
+            value = sanitization.escape(value)
+            const re = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+(?:[A-Z]{2}|com|org|net|gov|mil|biz|info|mobi|name|aero|jobs|museum)\b/
+            if (re.test(value)) {
+                return value
+            }
+        }
+        throw new ValidateError('email', '{name} not valid email')
+    }
+    return value
+}
+
 export default validation

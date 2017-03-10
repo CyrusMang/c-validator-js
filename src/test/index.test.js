@@ -141,5 +141,37 @@ describe('validator', () => {
                 expect(validation.slug('Test slug')).toEqual('test-slug')
             })
         })
+        describe('email', () => {
+            test('should return ValidateError when value = []', () => {
+                try {
+                    validation.email('test')
+                } catch(e) {
+                    return expect(e).toEqual({
+                        message: '{name} not valid email', 
+                        validation: 'email'
+                    })
+                }
+                throw Error('validation should not be pass')
+            })
+            test('should return true when value = `test@test.com`', () => {
+                expect(validation.email('test@test.com')).toEqual('test@test.com')
+            })
+        })
+        describe('phone', () => {
+            test('should return ValidateError when value = []', () => {
+                try {
+                    validation.phone('test')
+                } catch(e) {
+                    return expect(e).toEqual({
+                        message: '{name} not valid phone', 
+                        validation: 'phone'
+                    })
+                }
+                throw Error('validation should not be pass')
+            })
+            test('should return true when value = `92321424`', () => {
+                expect(validation.phone(92321424)).toEqual(92321424)
+            })
+        })
     })
 })
