@@ -41,20 +41,26 @@ describe('validator', () => {
                     }
                 }
                 try {
-                    console.log(Validate(schema, value))
+                    Validate(schema, value)
                 } catch(e) {
-                    return expect(e).toEqual([
-                        ['slug', {
-                            message: '{name} is required', 
-                            validation: 'required'
-                        }], 
-                        ['contact.phone', {
-                            message: "{name} is required", 
-                            validation: "required"
-                        }]
-                    ])
+                    if (Array.isArray(e)) {
+                        return expect(e.map(v => v.print())).toEqual([
+                            {
+                                message: 'slug is required', 
+                                validation: 'required'
+                            },
+                            {
+                                message: 'contact.email not valid email', 
+                                validation: 'email'
+                            },
+                            {
+                                message: 'contact.phone not valid phone', 
+                                validation: 'phone'
+                            }
+                        ])
+                    }
                 }
-                throw Error('validation should not be pass')
+                throw new Error('failure')
             })
             test('should return true when value match with schema', () => {
                 const value = {

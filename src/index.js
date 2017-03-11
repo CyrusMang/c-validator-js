@@ -8,6 +8,12 @@ export class ValidateError {
         this.name = name
         this.message = message
     }
+    print() {
+        return {
+            validation: this.validation,
+            message: this.message.replace('{name}', this.name || 'value')
+        }
+    }
 }
 
 const Validate = (schema, value, name) => {
@@ -38,7 +44,7 @@ const Validate = (schema, value, name) => {
             if (schema[0]) {
                 for (let [k, v] of value.entries()) {
                     try {
-                        value[k] = Validate(schema[0], v, `${name}.${k}`)
+                        value[k] = Validate(schema[0], v, name ? `${name}.${k}` : k)
                     } catch (e) {
                         if (Array.isArray(e)) {
                             errors = [...errors, ...e]
@@ -54,7 +60,7 @@ const Validate = (schema, value, name) => {
             }
             for (let [k, s] of Object.entries(schema)) {
                 try {
-                    value[k] = Validate(s, value[k], `${name}.${k}`)
+                    value[k] = Validate(s, value[k], name ? `${name}.${k}` : k)
                 } catch (e) {
                     if (Array.isArray(e)) {
                         errors = [...errors, ...e]
