@@ -1,72 +1,135 @@
 'use strict'
 
-import validation from './validation'
+import raw from './raw'
 
 export class ValidateError {
-    constructor(v, message) {
-        this.validation = v
+    constructor(validation, name, message) {
+        this.validation = validation
+        this.name = name
         this.message = message
     }
-    print() {
-        return {
-            validation: this.validation,
-            message: this.message
-        }
-    }
 }
 
-export const validate = (n, s, _value) => {
-    if (typeof s === 'string') {
-        try {
-            _value = _value && escape(_value)
-            for (let v of s.split('|')) {
-                let _v = v.split(':')
-                _value = validation[_v[0]](_value, _v[1])
-            }
-        } catch(e) {
-            throw e instanceof ValidateError ? [n, e] : e
-        }
-    } else if (typeof s === 'function') {
-        _value = s(n, _value)
-    } else if (Array.isArray(s)) {
-        _value = _value || []
-        if (!Array.isArray(_value)) {
-            throw [n, new ValidateError('type', '{name} input should be an array')]
-        }
-        if (s[0]) {
-            for (let [k, __value] of _value.entries()) {
-                _value[k] = validate(`${n}.${k}`, s[0], __value)
-            }
-        }
-    } else if (typeof s === 'object') {
-        if (_value && typeof _value !== 'object') {
-            throw [n, new ValidateError('type', '{name} input should be an object')]
-        }
-        for (let [k, _s] of Object.entries(s)) {
-            _value[k] = validate(`${n}.${k}`, _s, _value ? _value[k] : null)
-        }
-    } else {
-        throw Error('Schema syntax error')
-    }
-    return _value
-}
-
-export default (schema, value) => {
+const Validate = (schema, value, name) => {
     let errors = []
-    let _value = {}
-    for (let [name, rule] of Object.entries(schema)) {
-        try {
-            _value[name] = validate(name, rule, value ? value[name] : null)
-        } catch(e) {
-            if (Array.isArray(e)) {
-                errors.push(e)
-            } else {
-                throw e
+    try {
+        if (typeof schema === 'string') {
+            if (value && typeof value !== 'string') {
+                throw new ValidateError('type', name, '{name} should be a string')
             }
+            for (let s of schema.split('|')) {
+                let _s = s.split(':')
+                value = validaters[_s[0]](name, value, _s[1])
+            }
+        } else if (typeof schema === 'function') {
+            try {
+                value = schema(name, value)
+            } catch (e) {
+                if (Array.isArray(e)) {
+                    errors = [...errors, ...e]
+                } else {
+                    throw e
+                }
+            }
+        } else if (Array.isArray(schema)) {
+            if (value && !Array.isArray(_value)) {
+                throw new ValidateError('type', name, '{name} should be an array')
+            }
+            if (schema[0]) {
+                for (let [k, v] of value.entries()) {
+                    try {
+                        value[k] = Validate(schema[0], v, `${name}.${k}`)
+                    } catch (e) {
+                        if (Array.isArray(e)) {
+                            errors = [...errors, ...e]
+                        } else {
+                            throw e
+                        }
+                    }
+                }
+            }
+        } else if (typeof schema === 'object') {
+            if (value && typeof value !== 'object') {
+                throw new ValidateError('type', name, '{name} should be an object')
+            }
+            for (let [k, s] of Object.entries(schema)) {
+                try {
+                    value[k] = Validate(s, value[k], `${name}.${k}`)
+                } catch (e) {
+                    if (Array.isArray(e)) {
+                        errors = [...errors, ...e]
+                    } else {
+                        throw e
+                    }
+                }
+            }
+        } else {
+            throw Error('Schema syntax error')
+        }
+        if (!errors.length) {
+            return value
+        }
+    } catch (e) {
+        if (e instanceof ValidateError) {
+            errors.push(e)
+        } else {
+            throw e
         }
     }
-    if (errors.length) {
-        throw errors
+    throw errors
+}
+export default Validate
+
+const validaters = {
+    required: (name, value) => {
+        if (raw.validation.empty(value)) {
+            throw new ValidateError('required', name, '{name} is required')
+        }
+        return raw.sanitization.escape(value)
+    },
+    in: (name, value, args) => {
+        args = typeof args === 'string' ? args.split(',') : (args || [])
+        if (!raw.validation.empty(value)) {
+            if (!raw.validation.in(value, args)) {
+                throw new ValidateError('in', name, '{name} not in option')
+            }
+        }
+        return value
+    },
+    regex: (name, value, args) => {
+        if (!raw.validation.empty(value)) {
+            if (!raw.validation.regex(value, args)) {
+                throw new ValidateError('regex', name, '{name} not valid')
+            }
+        }
+        return raw.sanitization.escape(value)
+    },
+    slug: (name, value) => {
+        if (!raw.validation.empty(value)) {
+            if (typeof value == 'string') {
+                value = raw.sanitization.slug(value)
+                if (value) {
+                    return value
+                }
+            }
+            throw new ValidateError('slug', name, '{name} not valid slug')
+        }
+        return value
+    },
+    email: (name, value) => {
+        if (!raw.validation.empty(value)) {
+            if (typeof value !== 'string' || !raw.validation.is_email(value)) {
+                throw new ValidateError('email', name, '{name} not valid email')
+            }
+        }
+        return value
+    },
+    phone: (name, value) => {
+        if (!raw.validation.empty(value)) {
+            if (typeof value !== 'string' || !raw.validation.is_phone(value)) {
+                throw new ValidateError('phone', name, '{name} not valid phone')
+            }
+        }
+        return value
     }
-    return _value
 }

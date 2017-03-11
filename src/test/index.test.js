@@ -1,8 +1,7 @@
 'use strict'
 
-import Validate, {validate, ValidateError} from '../'
-import * as raw from '../raw'
-import validation from '../validation'
+import Validate, {ValidateError} from '../'
+import raw from '../raw'
 
 describe('validator', () => {
     describe('main', () => {
@@ -11,13 +10,22 @@ describe('validator', () => {
                 name: 'required',
                 slug: 'required|slug',
                 contact: {
-                    email: 'required',
+                    email: 'required|email',
                     phone: (name, value) => {
-                        if (!Array.isArray(value) || raw.empty(value)) {
-                            throw [name, new ValidateError('required', '{name} is required')]
+                        if (!Array.isArray(value)) {
+                            throw new ValidateError('phone', name, '{name} not valid phone')
                         }
-                        for (let [k, _value] of value.entries()) {
-                            value[k] = validate(`${name}.${k}`, 'required', _value)
+                        if (raw.validation.empty(value)) {
+                            throw new ValidateError('required', name, '{name} is required')
+                        }
+                        let errors = []
+                        for (let [k, v] of value.entries()) {
+                            if (raw.validation.empty(v)) {
+                                errors.push(new ValidateError('required', `${name}.${k}`, '{name} is required'))
+                            }
+                        }
+                        if (errors.length) {
+                            throw errors
                         }
                         return value
                     }
@@ -33,7 +41,7 @@ describe('validator', () => {
                     }
                 }
                 try {
-                    Validate(schema, value)
+                    console.log(Validate(schema, value))
                 } catch(e) {
                     return expect(e).toEqual([
                         ['slug', {
@@ -70,107 +78,43 @@ describe('validator', () => {
     })
     describe('validation', () => {
         describe('required', () => {
-            test('should return ValidateError when value = null', () => {
-                try {
-                    validation.required(null)
-                } catch(e) {
-                    return expect(e).toEqual({
-                        message: '{name} is required', 
-                        validation: 'required'
-                    })
-                }
-                throw Error('validation should not be pass')
+            test('should return true when value = null', () => {
+                expect(raw.validation.empty(null)).toEqual(true)
             })
-            test('should return ValidateError when value = []', () => {
-                try {
-                    validation.required([])
-                } catch(e) {
-                    return expect(e).toEqual({
-                        message: '{name} is required', 
-                        validation: 'required'
-                    })
-                }
-                throw Error('validation should not be pass')
+            test('should return true when value = []', () => {
+                expect(raw.validation.empty([])).toEqual(true)
             })
-            test('should return ValidateError when value = {}', () => {
-                try {
-                    validation.required({})
-                } catch(e) {
-                    return expect(e).toEqual({
-                        message: '{name} is required', 
-                        validation: 'required'
-                    })
-                }
-                throw Error('validation should not be pass')
+            test('should return true when value = {}', () => {
+                expect(raw.validation.empty({})).toEqual(true)
             })
-            test('should return true when value = `not empty`', () => {
-                expect(validation.required('not empty')).not.toThrow(ValidateError)
+            test('should return false when value = `not empty`', () => {
+                expect(raw.validation.empty('not empty')).toEqual(false)
             })
         })
         describe('in', () => {
-            test('should return ValidateError when value not in [`a`, `b`, `c`]', () => {
-                try {
-                    validation.in('d', [])
-                } catch(e) {
-                    return expect(e).toEqual({
-                        message: '{name} not in option', 
-                        validation: 'in'
-                    })
-                }
-                throw Error('validation should not be pass')
+            test('should return false when value not in [`a`, `b`, `c`]', () => {
+                expect(raw.validation.in('d', [])).toEqual(false)
             })
             test('should return true when value in [`a`, `b`, `c`]', () => {
-                expect(validation.in('a', ['a','b','c'])).not.toThrow(ValidateError)
-                expect(validation.in('b', ['a','b','c'])).not.toThrow(ValidateError)
-                expect(validation.in('c', ['a','b','c'])).not.toThrow(ValidateError)
-            })
-        })
-        describe('slug', () => {
-            test('should return ValidateError when value = []', () => {
-                try {
-                    validation.slug(['test'])
-                } catch(e) {
-                    return expect(e).toEqual({
-                        message: '{name} not valid slug', 
-                        validation: 'slug'
-                    })
-                }
-                throw Error('validation should not be pass')
-            })
-            test('should return true when value = `Test slug`', () => {
-                expect(validation.slug('Test slug')).toEqual('test-slug')
+                expect(raw.validation.in('a', ['a','b','c'])).toEqual(true)
+                expect(raw.validation.in('b', ['a','b','c'])).toEqual(true)
+                expect(raw.validation.in('c', ['a','b','c'])).toEqual(true)
             })
         })
         describe('email', () => {
-            test('should return ValidateError when value = []', () => {
-                try {
-                    validation.email('test')
-                } catch(e) {
-                    return expect(e).toEqual({
-                        message: '{name} not valid email', 
-                        validation: 'email'
-                    })
-                }
-                throw Error('validation should not be pass')
+            test('should return false when value = []', () => {
+                expect(raw.validation.is_email('test')).toEqual(false)
             })
             test('should return true when value = `test@test.com`', () => {
-                expect(validation.email('test@test.com')).toEqual('test@test.com')
+                expect(raw.validation.is_email('test@test.com')).toEqual(true)
             })
         })
         describe('phone', () => {
-            test('should return ValidateError when value = []', () => {
-                try {
-                    validation.phone('test')
-                } catch(e) {
-                    return expect(e).toEqual({
-                        message: '{name} not valid phone', 
-                        validation: 'phone'
-                    })
-                }
-                throw Error('validation should not be pass')
+            test('should return false when value = []', () => {
+                expect(raw.validation.is_phone('test')).toEqual(false)
             })
             test('should return true when value = `92321424`', () => {
-                expect(validation.phone(92321424)).toEqual(92321424)
+                expect(raw.validation.is_phone(92321424)).toEqual(true)
             })
         })
     })
