@@ -46,14 +46,17 @@ describe('validator', () => {
                     if (Array.isArray(e)) {
                         return expect(e.map(v => v.print())).toEqual([
                             {
+                                field: 'slug',
                                 message: 'slug is required', 
                                 validation: 'required'
                             },
                             {
+                                field: 'contact.email',
                                 message: 'contact.email not valid email', 
                                 validation: 'email'
                             },
                             {
+                                field: 'contact.phone',
                                 message: 'contact.phone not valid phone', 
                                 validation: 'phone'
                             }

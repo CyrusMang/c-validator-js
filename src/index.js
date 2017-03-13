@@ -21,6 +21,9 @@ const Validate = (schema, value, name) => {
     let errors = []
     try {
         if (typeof schema === 'string') {
+            if (typeof value === 'string') {
+                value = raw.sanitization.escape(value)
+            }
             for (let s of schema.split('|')) {
                 let _s = s.split(':')
                 value = validaters[_s[0]](name, value, _s[1])
@@ -89,7 +92,7 @@ const validaters = {
         if (raw.validation.empty(value)) {
             throw new ValidateError('required', name, '{name} is required')
         }
-        return raw.sanitization.escape(value)
+        return value
     },
     in: (name, value, args) => {
         args = typeof args === 'string' ? args.split(',') : (args || [])
@@ -106,7 +109,7 @@ const validaters = {
                 throw new ValidateError('regex', name, '{name} not valid')
             }
         }
-        return raw.sanitization.escape(value)
+        return value
     },
     slug: (name, value) => {
         if (!raw.validation.empty(value)) {
