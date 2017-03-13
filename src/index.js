@@ -11,6 +11,7 @@ export class ValidateError {
     print() {
         return {
             validation: this.validation,
+            field: this.name,
             message: this.message.replace('{name}', this.name || 'value')
         }
     }
