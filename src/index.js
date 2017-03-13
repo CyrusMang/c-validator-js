@@ -21,9 +21,6 @@ const Validate = (schema, value, name) => {
     let errors = []
     try {
         if (typeof schema === 'string') {
-            if (value && typeof value !== 'string') {
-                throw new ValidateError('type', name, '{name} should be a string')
-            }
             for (let s of schema.split('|')) {
                 let _s = s.split(':')
                 value = validaters[_s[0]](name, value, _s[1])
