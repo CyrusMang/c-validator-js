@@ -39,7 +39,7 @@ const Validate = (schema, value, name) => {
                 }
             }
         } else if (Array.isArray(schema)) {
-            if (value && !Array.isArray(_value)) {
+            if (value && !Array.isArray(value)) {
                 throw new ValidateError('type', name, '{name} should be an array')
             }
             if (schema[0]) {
