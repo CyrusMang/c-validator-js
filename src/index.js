@@ -131,10 +131,10 @@ const validaters = {
         }
         return value
     },
-    phone: (name, value) => {
+    integer: (name, value) => {
         if (!raw.validation.empty(value)) {
-            if (typeof value !== 'string' || !raw.validation.is_phone(value)) {
-                throw new ValidateError('phone', name, '{name} not valid phone')
+            if (typeof value !== 'string' || !raw.validation.is_integer(value)) {
+                throw new ValidateError('integer', name, '{name} not valid integer')
             }
         }
         return value

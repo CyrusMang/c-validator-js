@@ -13,7 +13,7 @@ describe('validator', () => {
                     email: 'required|email',
                     phone: (name, value) => {
                         if (!Array.isArray(value)) {
-                            throw new ValidateError('phone', name, '{name} not valid phone')
+                            throw new ValidateError('phone', name, '{name} not valid phone list')
                         }
                         if (raw.validation.empty(value)) {
                             throw new ValidateError('required', name, '{name} is required')
@@ -57,7 +57,7 @@ describe('validator', () => {
                             },
                             {
                                 field: 'contact.phone',
-                                message: 'contact.phone not valid phone', 
+                                message: 'contact.phone not valid phone list', 
                                 validation: 'phone'
                             }
                         ])
@@ -118,12 +118,12 @@ describe('validator', () => {
                 expect(raw.validation.is_email('test@test.com')).toEqual(true)
             })
         })
-        describe('phone', () => {
+        describe('is_integer', () => {
             test('should return false when value = []', () => {
-                expect(raw.validation.is_phone('test')).toEqual(false)
+                expect(raw.validation.is_integer('test')).toEqual(false)
             })
             test('should return true when value = `92321424`', () => {
-                expect(raw.validation.is_phone(92321424)).toEqual(true)
+                expect(raw.validation.is_integer('92321424')).toEqual(true)
             })
         })
     })
