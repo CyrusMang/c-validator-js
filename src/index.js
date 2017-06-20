@@ -73,9 +73,6 @@ const Validate = (schema, value, name) => {
         } else {
             throw Error('Schema syntax error')
         }
-        if (!errors.length) {
-            return value
-        }
     } catch (e) {
         if (e instanceof ValidateError) {
             errors.push(e)
@@ -83,7 +80,10 @@ const Validate = (schema, value, name) => {
             throw e
         }
     }
-    throw errors
+    if (errors.length) {
+        throw errors
+    }
+    return value
 }
 export default Validate
 
