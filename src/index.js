@@ -24,9 +24,11 @@ const Validate = (schema, value, name) => {
             if (typeof value === 'string') {
                 value = raw.sanitization.escape(value)
             }
-            for (let s of schema.split('|')) {
-                let _s = s.split(':')
-                value = validaters[_s[0]](name, value, _s[1])
+            if (schema) {
+                for (let s of schema.split('|')) {
+                    let _s = s.split(':')
+                    value = validaters[_s[0]](name, value, _s[1])
+                }
             }
         } else if (typeof schema === 'function') {
             try {
