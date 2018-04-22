@@ -61,9 +61,10 @@ const Validate = (schema, value, name) => {
             if (value && typeof value !== 'object') {
                 throw new ValidateError('type', name, '{name} should be an object')
             }
+            let data = {}
             for (let [k, s] of Object.entries(schema)) {
                 try {
-                    value[k] = Validate(s, value[k], name ? `${name}.${k}` : k)
+                    data[k] = Validate(s, value[k], name ? `${name}.${k}` : k)
                 } catch (e) {
                     if (Array.isArray(e)) {
                         errors = [...errors, ...e]
@@ -72,6 +73,7 @@ const Validate = (schema, value, name) => {
                     }
                 }
             }
+            value = data
         } else {
             throw Error('Schema syntax error')
         }
