@@ -127,6 +127,14 @@ const validaters = {
         }
         return value
     },
+    phone: (name, value) => {
+        if (!raw.validation.empty(value)) {
+            if (typeof value !== 'string' || !raw.validation.is_phone(value)) {
+                throw new ValidateError('phone', name, '{name} not valid phone')
+            }
+        }
+        return value
+    },
     email: (name, value) => {
         if (!raw.validation.empty(value)) {
             if (typeof value !== 'string' || !raw.validation.is_email(value)) {
