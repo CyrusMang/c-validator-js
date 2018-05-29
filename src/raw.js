@@ -17,6 +17,10 @@ validation.empty = (value) => {
 validation.in = (value, args) => args.includes(value)
 validation.regex = (value, re) => new RegExp(re).test(value)
 validation.is_integer = (value) => /^\d+$/.test(value)
+validation.is_phone = (value) => {
+    const re = /^\+[1-9]\d{1,14}$/
+    return re.test(value)
+}
 validation.is_email = (value) => {
     const re = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_\`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+(?:[A-Z]{2}|com|org|net|gov|mil|biz|info|mobi|name|aero|jobs|museum)\b/
     return re.test(value)

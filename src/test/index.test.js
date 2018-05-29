@@ -110,8 +110,16 @@ describe('validator', () => {
                 expect(raw.validation.in('c', ['a','b','c'])).toEqual(true)
             })
         })
+        describe('phone', () => {
+            test('should return false when value = `test`', () => {
+                expect(raw.validation.is_phone('test')).toEqual(false)
+            })
+            test('should return true when value = `+12398930343`', () => {
+                expect(raw.validation.is_phone('+12398930343')).toEqual(true)
+            })
+        })
         describe('email', () => {
-            test('should return false when value = []', () => {
+            test('should return false when value = `test`', () => {
                 expect(raw.validation.is_email('test')).toEqual(false)
             })
             test('should return true when value = `test@test.com`', () => {
@@ -119,7 +127,7 @@ describe('validator', () => {
             })
         })
         describe('is_integer', () => {
-            test('should return false when value = []', () => {
+            test('should return false when value = `test`', () => {
                 expect(raw.validation.is_integer('test')).toEqual(false)
             })
             test('should return true when value = `92321424`', () => {
