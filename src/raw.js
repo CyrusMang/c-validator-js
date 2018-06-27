@@ -39,5 +39,15 @@ sanitization.escape = value => (value
     .replace(/\\/g, '&#x5C;')
     .replace(/`/g, '&#96;')
 )
+sanitization.unescape = value => (value
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#x27;/g, '\'')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&#x2F;/g, '/')
+    .replace(/&#x5C;/g, '\\')
+    .replace(/&#96;/g, '`')
+)
 
 export default {validation, sanitization}
