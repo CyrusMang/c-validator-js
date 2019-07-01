@@ -1,6 +1,6 @@
-'use strict'
+'use strict';
 
-import Validate, {ValidateError} from '../'
+import Validate, { ValidationError } from '../'
 import raw from '../raw'
 
 describe('validator', () => {
@@ -12,27 +12,24 @@ describe('validator', () => {
                 contact: {
                     email: 'required|email',
                     phone: (name, value) => {
-                        if (!Array.isArray(value)) {
-                            throw new ValidateError('phone', name, '{name} not valid phone list')
-                        }
-                        if (raw.validation.empty(value)) {
-                            throw new ValidateError('required', name, '{name} is required')
-                        }
                         let errors = []
-                        for (let [k, v] of value.entries()) {
-                            if (raw.validation.empty(v)) {
-                                errors.push(new ValidateError('required', `${name}.${k}`, '{name} is required'))
+                        if (!Array.isArray(value)) {
+                            errors.push(new ValidationError('phone', name, '{name} not valid phone list'))
+                        } else if (raw.validation.empty(value)) {
+                            errors.push(new ValidationError('required', name, '{name} is required'))
+                        } else {
+                            for (let [k, v] of value.entries()) {
+                                if (raw.validation.empty(v)) {
+                                    errors.push(new ValidationError('required', `${name}.${k}`, '{name} is required'))
+                                }
                             }
                         }
-                        if (errors.length) {
-                            throw errors
-                        }
-                        return value
+                        return [value, errors]
                     }
                 }
             }
             test('should return a list of errors when value not match with schema', () => {
-                const value = {
+                const data = {
                     name: 'Test',
                     slug: '',
                     contact: {
@@ -40,33 +37,27 @@ describe('validator', () => {
                         phote: '62372424'
                     }
                 }
-                try {
-                    Validate(schema, value)
-                } catch(e) {
-                    if (Array.isArray(e)) {
-                        return expect(e.map(v => v.print())).toEqual([
-                            {
-                                field: 'slug',
-                                message: 'slug is required', 
-                                validation: 'required'
-                            },
-                            {
-                                field: 'contact.email',
-                                message: 'contact.email not valid email', 
-                                validation: 'email'
-                            },
-                            {
-                                field: 'contact.phone',
-                                message: 'contact.phone not valid phone list', 
-                                validation: 'phone'
-                            }
-                        ])
+                const [value, errors] = Validate(schema, data)
+                return expect(errors.map(v => v.details)).toEqual([
+                    {
+                        path: 'slug',
+                        message: '{name} is required', 
+                        validation: 'required'
+                    },
+                    {
+                        path: 'contact.email',
+                        message: '{name} not valid email', 
+                        validation: 'email'
+                    },
+                    {
+                        path: 'contact.phone',
+                        message: '{name} not valid phone list', 
+                        validation: 'phone'
                     }
-                }
-                throw new Error('failure')
+                ])
             })
             test('should return true when value match with schema', () => {
-                const value = {
+                const data = {
                     name: 'Test',
                     slug: 'name-test',
                     contact: {
@@ -74,7 +65,8 @@ describe('validator', () => {
                         phone: ['62372424']
                     }
                 }
-                expect(Validate(schema, value)).toEqual({
+                const [value, errors] = Validate(schema, data)
+                expect(value).toEqual({
                     name: 'Test',
                     slug: 'name-test',
                     contact: {
@@ -112,26 +104,26 @@ describe('validator', () => {
         })
         describe('phone', () => {
             test('should return false when value = `test`', () => {
-                expect(raw.validation.is_phone('test')).toEqual(false)
+                expect(raw.validation.isPhone('test')).toEqual(false)
             })
             test('should return true when value = `+12398930343`', () => {
-                expect(raw.validation.is_phone('+12398930343')).toEqual(true)
+                expect(raw.validation.isPhone('+12398930343')).toEqual(true)
             })
         })
         describe('email', () => {
             test('should return false when value = `test`', () => {
-                expect(raw.validation.is_email('test')).toEqual(false)
+                expect(raw.validation.isEmail('test')).toEqual(false)
             })
             test('should return true when value = `test@test.com`', () => {
-                expect(raw.validation.is_email('test@test.com')).toEqual(true)
+                expect(raw.validation.isEmail('test@test.com')).toEqual(true)
             })
         })
         describe('is_integer', () => {
             test('should return false when value = `test`', () => {
-                expect(raw.validation.is_integer('test')).toEqual(false)
+                expect(raw.validation.isInteger('test')).toEqual(false)
             })
             test('should return true when value = `92321424`', () => {
-                expect(raw.validation.is_integer('92321424')).toEqual(true)
+                expect(raw.validation.isInteger('92321424')).toEqual(true)
             })
         })
     })

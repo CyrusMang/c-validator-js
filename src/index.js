@@ -1,100 +1,17 @@
-'use strict'
+'use strict';
 
 import raw from './raw'
 
-export class ValidateError {
-    constructor(validation, name, message) {
-        this.validation = validation
-        this.name = name
-        this.message = message
-    }
-    print() {
-        return {
-            validation: this.validation,
-            field: this.name,
-            message: this.message.replace('{name}', this.name || 'value')
-        }
+export class ValidationError {
+    constructor(validation, path, message) {
+        this.details = { validation, path, message }
     }
 }
-
-const Validate = (schema, value, name) => {
-    let errors = []
-    try {
-        if (typeof schema === 'string') {
-            if (typeof value === 'string') {
-                value = raw.sanitization.escape(value)
-            }
-            if (schema) {
-                for (let s of schema.split('|')) {
-                    let _s = s.split(':')
-                    value = validaters[_s[0]](name, value, _s[1])
-                }
-            }
-        } else if (typeof schema === 'function') {
-            try {
-                value = schema(name, value)
-            } catch (e) {
-                if (Array.isArray(e)) {
-                    errors = [...errors, ...e]
-                } else {
-                    throw e
-                }
-            }
-        } else if (Array.isArray(schema)) {
-            if (value && !Array.isArray(value)) {
-                throw new ValidateError('type', name, '{name} should be an array')
-            }
-            if (schema[0]) {
-                for (let [k, v] of value.entries()) {
-                    try {
-                        value[k] = Validate(schema[0], v, name ? `${name}.${k}` : k)
-                    } catch (e) {
-                        if (Array.isArray(e)) {
-                            errors = [...errors, ...e]
-                        } else {
-                            throw e
-                        }
-                    }
-                }
-            }
-        } else if (typeof schema === 'object') {
-            if (value && typeof value !== 'object') {
-                throw new ValidateError('type', name, '{name} should be an object')
-            }
-            let data = {}
-            for (let [k, s] of Object.entries(schema)) {
-                try {
-                    data[k] = Validate(s, value[k], name ? `${name}.${k}` : k)
-                } catch (e) {
-                    if (Array.isArray(e)) {
-                        errors = [...errors, ...e]
-                    } else {
-                        throw e
-                    }
-                }
-            }
-            value = data
-        } else {
-            throw Error('Schema syntax error')
-        }
-    } catch (e) {
-        if (e instanceof ValidateError) {
-            errors.push(e)
-        } else {
-            throw e
-        }
-    }
-    if (errors.length) {
-        throw errors
-    }
-    return value
-}
-export default Validate
 
 const validaters = {
     required: (name, value) => {
         if (raw.validation.empty(value)) {
-            throw new ValidateError('required', name, '{name} is required')
+            throw new ValidationError('required', name, '{name} is required')
         }
         return value
     },
@@ -102,7 +19,7 @@ const validaters = {
         args = typeof args === 'string' ? args.split(',') : (args || [])
         if (!raw.validation.empty(value)) {
             if (!raw.validation.in(value, args)) {
-                throw new ValidateError('in', name, '{name} not in option')
+                throw new ValidationError('in', name, '{name} not in option')
             }
         }
         return value
@@ -110,7 +27,7 @@ const validaters = {
     regex: (name, value, args) => {
         if (!raw.validation.empty(value)) {
             if (!raw.validation.regex(value, args)) {
-                throw new ValidateError('regex', name, '{name} not valid')
+                throw new ValidationError('regex', name, '{name} not valid')
             }
         }
         return value
@@ -123,32 +40,91 @@ const validaters = {
                     return value
                 }
             }
-            throw new ValidateError('slug', name, '{name} not valid slug')
+            throw new ValidationError('slug', name, '{name} not valid slug')
         }
         return value
     },
     phone: (name, value) => {
         if (!raw.validation.empty(value)) {
-            if (typeof value !== 'string' || !raw.validation.is_phone(value)) {
-                throw new ValidateError('phone', name, '{name} not valid phone')
+            if (typeof value !== 'string' || !raw.validation.isPhone(value)) {
+                throw new ValidationError('phone', name, '{name} not valid phone')
             }
         }
         return value
     },
     email: (name, value) => {
         if (!raw.validation.empty(value)) {
-            if (typeof value !== 'string' || !raw.validation.is_email(value)) {
-                throw new ValidateError('email', name, '{name} not valid email')
+            if (typeof value !== 'string' || !raw.validation.isEmail(value)) {
+                throw new ValidationError('email', name, '{name} not valid email')
             }
         }
         return value
     },
     integer: (name, value) => {
         if (!raw.validation.empty(value)) {
-            if (typeof value !== 'string' || !raw.validation.is_integer(value)) {
-                throw new ValidateError('integer', name, '{name} not valid integer')
+            if (typeof value !== 'string' || !raw.validation.isInteger(value)) {
+                throw new ValidationError('integer', name, '{name} not valid integer')
             }
         }
         return value
     }
 }
+
+const Validate = (schema, value, name) => {
+    let errors = []
+    if (typeof schema === 'string') {
+        if (typeof value === 'string') {
+            value = raw.sanitization.escape(value)
+        }
+        if (schema) {
+            for (let s of schema.split('|')) {
+                let n = s.split(':')
+                try {
+                    value = validaters[n[0]](name, value, n[1])
+                } catch (e) {
+                    if (e instanceof ValidationError) {
+                        errors.push(e)
+                    } else {
+                        throw e
+                    }
+                }
+            }
+        }
+    } else if (typeof schema === 'function') {
+        const [v, e] = schema(name, value)
+        if (e) {
+            errors = [...errors, ...e]
+        }
+        value = v
+    } else if (Array.isArray(schema)) {
+        if (value && !Array.isArray(value)) {
+            errors.push(new ValidationError('type', name, '{name} should be an array'))
+        } else if (schema[0]) {
+            value = value.map((_v, i) => {
+                const [v, e] = Validate(schema[0], _v, name ? `${name}.${i}` : i)
+                if (e) {
+                    errors = [...errors, ...e]
+                }
+                return v
+            })
+        }
+    } else if (typeof schema === 'object') {
+        if (value && typeof value !== 'object') {
+            errors.push(ValidationError('type', name, '{name} should be an object'))
+        }
+        let data = {}
+        for (let [k, s] of Object.entries(schema)) {
+            let [v, e] = Validate(s, value[k], name ? `${name}.${k}` : k)
+            if (e) {
+                errors = [...errors, ...e]
+            }
+            data[k] = v
+        }
+        value = data
+    } else {
+        throw Error('Schema syntax error')
+    }
+    return [value, errors.length ? errors : null]
+}
+
+export default Validate

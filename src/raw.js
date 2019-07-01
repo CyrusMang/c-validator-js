@@ -1,53 +1,50 @@
-'use strict'
+'use strict';
 
-const validation = {}
+const specialChars = [
+    ['&', '&amp;'],
+    ['"', '&quot;'],
+    ['\'', '&#x27;'],
+    ['<', '&lt;'],
+    ['>', '&gt;'],
+    ['/', '&#x2F;'],
+    ['\\\\', '&#x5C;'],
+    ['`', '&#96;'],
+]
 
-validation.empty = (value) => {
-    if (value === null || value === undefined) {
-        return true
-    }
-    switch(typeof value) {
-        case 'string':
-        case 'array':
-            return value.length === 0
-        case 'object':
-            return Object.keys(value).length === 0
-    }
+const sanitization = {
+    slug: v => v.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, ''),
+    escape: v => {
+        specialChars.forEach(s => {
+            v.replace(new RegExp(s[0], 'g'), s[1])
+        })
+        return v
+    },
+    unescape: v => {
+        specialChars.forEach(s => {
+            v.replace(new RegExp(s[1], 'g'), s[0])
+        })
+        return v
+    },
 }
-validation.in = (value, args) => args.includes(value)
-validation.regex = (value, re) => new RegExp(re).test(value)
-validation.is_integer = (value) => /^\d+$/.test(value)
-validation.is_phone = (value) => {
-    const re = /^\+[1-9]\d{1,14}$/
-    return re.test(value)
-}
-validation.is_email = (value) => {
-    const re = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_\`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+(?:[a-z]{2}|com|org|net|gov|mil|biz|info|mobi|name|aero|jobs|museum)\b/
-    return re.test(value)
-}
 
-const sanitization = {}
-
-sanitization.slug = (v) => v.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '')
-sanitization.escape = value => (value
-    .replace(/&/g, '&amp;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#x27;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/\//g, '&#x2F;')
-    .replace(/\\/g, '&#x5C;')
-    .replace(/`/g, '&#96;')
-)
-sanitization.unescape = value => (value
-    .replace(/&amp;/g, '&')
-    .replace(/&quot;/g, '"')
-    .replace(/&#x27;/g, '\'')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&#x2F;/g, '/')
-    .replace(/&#x5C;/g, '\\')
-    .replace(/&#96;/g, '`')
-)
+const validation = {
+    empty: v => {
+        if (v === null || v === undefined) {
+            return true
+        }
+        switch(typeof v) {
+            case 'string':
+            case 'array':
+                return v.length === 0
+            case 'object':
+                return Object.keys(v).length === 0
+        }
+    },
+    in: (v, args) => args.includes(v),
+    regex: (v, re) => new RegExp(re).test(v),
+    isInteger: v => new RegExp("^\\d+$").test(v),
+    isPhone: v => new RegExp("^\\+[1-9]\\d{1,14}$").test(v),
+    isEmail: v => new RegExp("[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_\\`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+(?:[a-z]{2}|com|org|net|gov|mil|biz|info|mobi|name|aero|jobs|museum)\\b").test(v),
+}
 
 export default {validation, sanitization}
