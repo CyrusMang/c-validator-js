@@ -5,7 +5,7 @@
   "main": "./lib",
   "scripts": {
     "test": "npm run compile && ./node_modules/.bin/jest --testPathPattern=./lib/test/[^.]+.test.js",
-    "compile": "./node_modules/.bin/babel --presets env,stage-0 -d lib/ src/",
+    "compile": "./node_modules/.bin/babel --presets @babel/preset-env -d lib/ src/",
     "prepare": "npm run compile"
   },
   "repository": {
@@ -19,9 +19,8 @@
   },
   "homepage": "https://github.com/CyrusMang/c-validator-js#readme",
   "devDependencies": {
-    "babel-cli": "^6.22.2",
-    "babel-preset-env": "^1.7.0",
-    "babel-preset-stage-0": "^6.22.0",
+    "@babel/cli": "^7.4.4",
+    "@babel/preset-env": "^7.4.5",
     "jest": "^24.8.0"
   }
 }
