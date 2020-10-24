@@ -1,7 +1,6 @@
-'use strict';
-
-import Validate, { ValidationError } from '../'
-import raw from '../raw'
+const Validate = require('./')
+const ValidationError = require('./error')
+const raw = require('./raw')
 
 describe('validator', () => {
     describe('main', () => {

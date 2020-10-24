@@ -1,5 +1,3 @@
-'use strict';
-
 const specialChars = [
     ['&', '&amp;'],
     ['"', '&quot;'],
@@ -11,7 +9,7 @@ const specialChars = [
     ['`', '&#96;'],
 ]
 
-const sanitization = {
+exports.sanitization = {
     slug: v => v.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, ''),
     escape: v => {
         specialChars.forEach(s => {
@@ -27,12 +25,12 @@ const sanitization = {
     },
 }
 
-const validation = {
+exports.validation = {
     empty: v => {
         if (v === null || v === undefined) {
             return true
         }
-        switch(typeof v) {
+        switch (typeof v) {
             case 'string':
             case 'array':
                 return v.length === 0
@@ -46,5 +44,3 @@ const validation = {
     isPhone: v => new RegExp("^\\+[1-9]\\d{1,14}$").test(v),
     isEmail: v => new RegExp("[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_\\`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+(?:[a-z]{2}|com|org|net|gov|mil|biz|info|mobi|name|aero|jobs|museum)\\b").test(v),
 }
-
-export default {validation, sanitization}

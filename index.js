@@ -1,12 +1,5 @@
-'use strict';
-
-import raw from './raw'
-
-export class ValidationError {
-    constructor(validation, path, message) {
-        this.details = { validation, path, message }
-    }
-}
+const ValidationError = require('./error')
+const raw = require('./raw')
 
 const validaters = {
     required: (name, value) => {
@@ -127,4 +120,4 @@ const Validate = (schema, value, name) => {
     return [value, errors.length ? errors : null]
 }
 
-export default Validate
+module.exports = Validate
