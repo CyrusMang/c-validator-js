@@ -76,32 +76,36 @@ const validaters = {
   }
 }
 
-const Validate = async (schema, value, path) => {
+const schemaFormat = schema => {
   if (typeof schema === 'string') {
-    schema = {
+    return {
       _type: 'string',
       condition: schema
     }
   } else if (Array.isArray(schema)) {
-    schema = {
+    return {
       _type: 'list',
       item: schema.length ? schema[0] : '',
     }
-  } else if (typeof schema === 'object' && !schema._type) {
-    schema = {
+  } else if (typeof schema === 'object') {
+    if (schema._type) {
+      return schema
+    }
+    return {
       _type: 'dist',
       schema: schema,
     }
   } else if (typeof schema === 'function') {
-    schema = {
+    return {
       _type: 'custom',
       validation: schema,
     }
   }
-  
-  if (typeof schema !== 'object' || !schema._type) {
-    throw new Error('Schema syntax error')
-  }
+  throw new Error('Schema syntax error')
+}
+
+const Validate = async (schema, value, path) => {
+  schema = schemaFormat(schema)
 
   let errors = []
   switch (schema._type) {
