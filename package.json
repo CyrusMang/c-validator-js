@@ -1,6 +1,6 @@
 {
   "name": "c-validator",
-  "version": "5.0.0",
+  "version": "5.1.0",
   "description": "Validating and sanitizing data",
   "main": "./",
   "scripts": {
@@ -17,6 +17,6 @@
   },
   "homepage": "https://github.com/CyrusMang/c-validator-js#readme",
   "devDependencies": {
-    "jest": "^26.6.3"
+    "jest": "^27.2.1"
   }
 }

@@ -73,7 +73,8 @@ const validaters = {
       }
     }
     return [value, errors]
-  }
+  },
+  boolean: (path, value) => [raw.sanitization.toBoolean(value), []],
 }
 
 const schemaFormat = schema => {

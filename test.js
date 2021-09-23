@@ -34,6 +34,7 @@ describe('validator', () => {
           }
           return [value, errors]
         },
+        isadmin: 'boolean',
       }
       test('should return a list of errors when value not match with schema', async () => {
         const data = {
@@ -49,6 +50,7 @@ describe('validator', () => {
           projects: [{
             slug: 'test',
           }],
+          isadmin: 'false',
         }
         try {
           const [value, errors] = await Validate(schema, data)
@@ -93,6 +95,7 @@ describe('validator', () => {
           projects: [{
             title: 'test',
           }],
+          isadmin: 'false',
         }
         try {
           const [value, errors] = await Validate(schema, data)
@@ -110,6 +113,7 @@ describe('validator', () => {
             projects: [{
               title: 'test',
             }],
+            isadmin: false,
           })
         } catch (e) {
           throw e

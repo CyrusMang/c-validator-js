@@ -11,6 +11,14 @@ const specialChars = [
 
 exports.sanitization = {
   slug: v => v.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, ''),
+  toBoolean: v => {
+    switch (typeof v) {
+      case 'string':
+        return v !== 'false' && v !== '0'
+      default:
+        return !!v
+    }
+  },
   escape: v => {
     specialChars.forEach(s => {
       v.replace(new RegExp(s[0], 'g'), s[1])
