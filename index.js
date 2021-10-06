@@ -62,18 +62,7 @@ const validaters = {
     }
     return [value, errors]
   },
-  integer: (path, value) => {
-    let errors = []
-    if (!raw.validation.empty(value)) {
-      if (typeof value !== 'string' || !raw.validation.isInteger(value)) {
-        errors.push({
-          path,
-          message: '{name} not valid integer',
-        })
-      }
-    }
-    return [value, errors]
-  },
+  integer: (path, value) => [raw.sanitization.toInteger(value), []],
   boolean: (path, value) => [raw.sanitization.toBoolean(value), []],
 }
 

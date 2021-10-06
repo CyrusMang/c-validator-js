@@ -7,6 +7,7 @@ describe('validator', () => {
       const schema = {
         name: 'required',
         slug: 'required|slug',
+        age: 'required|integer',
         contact: {
           email: 'required|email',
           phones: {
@@ -40,6 +41,7 @@ describe('validator', () => {
         const data = {
           name: 'Test',
           slug: '',
+          age: 20,
           contact: {
             email: 'testtesting.com',
             phones: '62372424',
@@ -84,6 +86,7 @@ describe('validator', () => {
         const data = {
           name: 'Test',
           slug: 'name-test',
+          age: '20',
           contact: {
             email: 'test@testing.com',
             phones: ['62372424'],
@@ -102,6 +105,7 @@ describe('validator', () => {
           expect(value).toEqual({
             name: 'Test',
             slug: 'name-test',
+            age: 20,
             contact: {
               email: 'test@testing.com',
               phones: ['62372424'],
@@ -160,14 +164,6 @@ describe('validator', () => {
       })
       test('should return true when value = `test@test.com`', () => {
         expect(raw.validation.isEmail('test@test.com')).toEqual(true)
-      })
-    })
-    describe('is_integer', () => {
-      test('should return false when value = `test`', () => {
-        expect(raw.validation.isInteger('test')).toEqual(false)
-      })
-      test('should return true when value = `92321424`', () => {
-        expect(raw.validation.isInteger('92321424')).toEqual(true)
       })
     })
   })

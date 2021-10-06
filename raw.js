@@ -19,6 +19,14 @@ exports.sanitization = {
         return !!v
     }
   },
+  toInteger: v => {
+    let x
+    if (isNaN(v)) {
+      return 0
+    }
+    x = parseFloat(v)
+    return x || 0
+  },
   escape: v => {
     specialChars.forEach(s => {
       v.replace(new RegExp(s[0], 'g'), s[1])
@@ -47,7 +55,6 @@ exports.validation = {
     }
   },
   in: (v, args) => args.includes(v),
-  isInteger: v => new RegExp("^\\d+$").test(v),
   isPhone: v => new RegExp("^\\+[1-9]\\d{1,14}$").test(v),
   isEmail: v => new RegExp("[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_\\`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+(?:[a-z]{2}|com|org|net|gov|mil|biz|info|mobi|name|aero|jobs|museum)\\b").test(v),
 }
