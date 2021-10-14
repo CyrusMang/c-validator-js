@@ -37,7 +37,7 @@ describe('validator', () => {
         },
         isadmin: 'boolean',
       }
-      test('should return a list of errors when value not match with schema', async () => {
+      test('should return a list of errors when value not match with schema', () => {
         const data = {
           name: 'Test',
           slug: '',
@@ -54,35 +54,31 @@ describe('validator', () => {
           }],
           isadmin: 'false',
         }
-        try {
-          const [value, errors] = await Validate(schema, data)
-          expect(errors).toEqual([
-            {
-              path: 'slug',
-              message: '{name} is required', 
-            },
-            {
-              path: 'contact.email',
-              message: '{name} not valid email', 
-            },
-            {
-              path: 'contact.phones',
-              message: '{name} should be a list', 
-            },
-            {
-              path: 'contact.addresses.0.building',
-              message: '{name} is required', 
-            },
-            {
-              path: 'projects.0',
-              message: '{name} is invalid project', 
-            }
-          ])
-        } catch (e) {
-          throw e
-        }
+        const [value, errors] = Validate(schema, data)
+        expect(errors).toEqual([
+          {
+            path: 'slug',
+            message: '{name} is required', 
+          },
+          {
+            path: 'contact.email',
+            message: '{name} not valid email', 
+          },
+          {
+            path: 'contact.phones',
+            message: '{name} should be a list', 
+          },
+          {
+            path: 'contact.addresses.0.building',
+            message: '{name} is required', 
+          },
+          {
+            path: 'projects.0',
+            message: '{name} is invalid project', 
+          }
+        ])
       })
-      test('should return true when value match with schema', async () => {
+      test('should return true when value match with schema', () => {
         const data = {
           name: 'Test',
           slug: 'name-test',
@@ -100,28 +96,24 @@ describe('validator', () => {
           }],
           isadmin: 'false',
         }
-        try {
-          const [value, errors] = await Validate(schema, data)
-          expect(value).toEqual({
-            name: 'Test',
-            slug: 'name-test',
-            age: 20,
-            contact: {
-              email: 'test@testing.com',
-              phones: ['62372424'],
-              addresses: [{
-                region: 'test',
-                building: 'test',
-              }],
-            },
-            projects: [{
-              title: 'test',
+        const [value, errors] = Validate(schema, data)
+        expect(value).toEqual({
+          name: 'Test',
+          slug: 'name-test',
+          age: 20,
+          contact: {
+            email: 'test@testing.com',
+            phones: ['62372424'],
+            addresses: [{
+              region: 'test',
+              building: 'test',
             }],
-            isadmin: false,
-          })
-        } catch (e) {
-          throw e
-        }
+          },
+          projects: [{
+            title: 'test',
+          }],
+          isadmin: false,
+        })
       })
     })
   })

@@ -94,7 +94,7 @@ const schemaFormat = schema => {
   throw new Error('Schema syntax error')
 }
 
-const Validate = async (schema, value, path) => {
+const Validate = (schema, value, path) => {
   schema = schemaFormat(schema)
 
   let errors = []
@@ -129,16 +129,12 @@ const Validate = async (schema, value, path) => {
         }
       }
       let list = []
-      try {
-        for (let [i, _value] of value.entries()) {
-          let [v, _errors] = await Validate(schema.item, _value, path ? `${path}.${i}` : i)
-          if (_errors) {
-            errors = [...errors, ..._errors]
-          }
-          list.push(v)
+      for (let [i, _value] of value.entries()) {
+        let [v, _errors] = Validate(schema.item, _value, path ? `${path}.${i}` : i)
+        if (_errors) {
+          errors = [...errors, ..._errors]
         }
-      } catch (e) {
-        throw e
+        list.push(v)
       }
       value = list
       break
@@ -160,29 +156,21 @@ const Validate = async (schema, value, path) => {
         }
       }
       let dist = {}
-      try {
-        for (let [k, s] of Object.entries(schema.schema)) {
-          let [v, _errors] = await Validate(s, value[k], path ? `${path}.${k}` : k)
-          if (_errors) {
-            errors = [...errors, ..._errors]
-          }
-          dist[k] = v
+      for (let [k, s] of Object.entries(schema.schema)) {
+        let [v, _errors] = Validate(s, value[k], path ? `${path}.${k}` : k)
+        if (_errors) {
+          errors = [...errors, ..._errors]
         }
-      } catch (e) {
-        throw e
+        dist[k] = v
       }
       value = dist
       break
     case 'custom':
-      try {
-        let [v, _errors] = await schema.validation(path, value)
-        if (_errors) {
-          errors = [...errors, ..._errors]
-        }
-        value = v
-      } catch (e) {
-        throw e
+      let [v, _errors] = schema.validation(path, value)
+      if (_errors) {
+        errors = [...errors, ..._errors]
       }
+      value = v
       break
   }
   return [value, errors]
