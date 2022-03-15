@@ -42,7 +42,7 @@ Validator                               | Description
 **in**                                  | check if value is in the options `in:pending,paid`
 **phone**                               | check if value is a phone number
 **email**                               | check if value is an email
-**datetime**                            | check if value is a valid datetime
+**datetime**                            | check if value is a valid datetime `datetime:YYYY-MM-DD`
 **integer**                             | check if value is a integer
 **float**                               | check if value is a float
 **boolean**                             | check if value is a boolean
