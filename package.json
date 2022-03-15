@@ -18,5 +18,8 @@
   "homepage": "https://github.com/CyrusMang/c-validator-js#readme",
   "devDependencies": {
     "jest": "^27.2.1"
+  },
+  "dependencies": {
+    "moment": "^2.29.1"
   }
 }

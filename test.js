@@ -8,6 +8,7 @@ describe('validator', () => {
         name: 'required',
         slug: 'required|slug',
         age: 'required|integer',
+        birthday: 'required|datetime:YYYY-MM-DD',
         contact: {
           email: 'required|email',
           phones: {
@@ -42,6 +43,7 @@ describe('validator', () => {
           name: 'Test',
           slug: '',
           age: 20,
+          birthday: '1testing',
           contact: {
             email: 'testtesting.com',
             phones: '62372424',
@@ -59,6 +61,10 @@ describe('validator', () => {
           {
             path: 'slug',
             message: '{name} is required', 
+          },
+          {
+            path: 'birthday',
+            message: '{name} not valid datetime', 
           },
           {
             path: 'contact.email',
@@ -83,6 +89,7 @@ describe('validator', () => {
           name: 'Test',
           slug: 'name-test',
           age: '20',
+          birthday: '1922-01-23',
           contact: {
             email: 'test@testing.com',
             phones: ['62372424'],
@@ -101,6 +108,7 @@ describe('validator', () => {
           name: 'Test',
           slug: 'name-test',
           age: 20,
+          birthday: '1922-01-23',
           contact: {
             email: 'test@testing.com',
             phones: ['62372424'],

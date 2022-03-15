@@ -1,3 +1,4 @@
+const moment = require('moment')
 const raw = require('./raw')
 
 const validaters = {
@@ -57,6 +58,21 @@ const validaters = {
         errors.push({
           path,
           message: '{name} not valid email',
+        })
+      }
+    }
+    return [value, errors]
+  },
+  datetime: (path, value, args) => {
+    let errors = []
+    if (!raw.validation.empty(value)) {
+      const datetime = moment(value, args)
+      if (datetime.isValid()) {
+        value = datetime.format(args)
+      } else {
+        errors.push({
+          path,
+          message: '{name} not valid datetime',
         })
       }
     }
