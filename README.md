@@ -47,6 +47,15 @@ Validator                               | Description
 **float**                               | check if value is a float
 **boolean**                             | check if value is a boolean
 
+## Advanced
+```javascript
+const schema = {
+  posts: (path, value) => {
+    // custom
+    return [value, errors]
+  }
+}
+```
 
 ## Tests
 
