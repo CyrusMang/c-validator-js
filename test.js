@@ -8,6 +8,7 @@ describe('validator', () => {
         name: 'required',
         slug: 'required|slug',
         age: 'required|integer',
+        height: 'required|float',
         birthday: 'required|datetime:YYYY-MM-DD',
         contact: {
           email: 'required|email',
@@ -43,6 +44,7 @@ describe('validator', () => {
           name: 'Test',
           slug: '',
           age: 20,
+          height: 180.2,
           birthday: '1testing',
           contact: {
             email: 'testtesting.com',
@@ -89,6 +91,7 @@ describe('validator', () => {
           name: 'Test',
           slug: 'name-test',
           age: '20',
+          height: '180.2',
           birthday: '1922-01-23',
           contact: {
             email: 'test@testing.com',
@@ -108,6 +111,7 @@ describe('validator', () => {
           name: 'Test',
           slug: 'name-test',
           age: 20,
+          height: 180.2,
           birthday: '1922-01-23',
           contact: {
             email: 'test@testing.com',

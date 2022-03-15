@@ -24,6 +24,14 @@ exports.sanitization = {
     if (isNaN(v)) {
       return 0
     }
+    x = parseInt(v)
+    return x || 0
+  },
+  toFloat: v => {
+    let x
+    if (isNaN(v)) {
+      return 0
+    }
     x = parseFloat(v)
     return x || 0
   },

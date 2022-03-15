@@ -66,7 +66,7 @@ const validaters = {
   datetime: (path, value, args) => {
     let errors = []
     if (!raw.validation.empty(value)) {
-      const datetime = moment(value, args)
+      const datetime = moment(value, args, true)
       if (datetime.isValid()) {
         value = datetime.format(args)
       } else {
@@ -79,6 +79,7 @@ const validaters = {
     return [value, errors]
   },
   integer: (path, value) => [raw.sanitization.toInteger(value), []],
+  float: (path, value) => [raw.sanitization.toFloat(value), []],
   boolean: (path, value) => [raw.sanitization.toBoolean(value), []],
 }
 
