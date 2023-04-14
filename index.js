@@ -184,7 +184,7 @@ const cvalidate = (schema, value, path, rootData) => {
       value = dist
       break
     case 'custom':
-      let [v, _errors] = schema.validation(path, value)
+      let [v, _errors] = schema.validation(path, value, rootData)
       if (_errors) {
         errors = [...errors, ..._errors]
       }
