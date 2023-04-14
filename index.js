@@ -111,9 +111,10 @@ const schemaFormat = schema => {
   throw new Error('Schema syntax error')
 }
 
-const Validate = (schema, value, path) => {
+const cvalidate = (schema, value, path, rootData) => {
   schema = schemaFormat(schema)
-
+  rootData = rootData || value
+  
   let errors = []
   switch (schema._type) {
     case 'string':
@@ -147,7 +148,7 @@ const Validate = (schema, value, path) => {
       }
       let list = []
       for (let [i, _value] of value.entries()) {
-        let [v, _errors] = Validate(schema.item, _value, path ? `${path}.${i}` : i)
+        let [v, _errors] = cvalidate(schema.item, _value, path ? `${path}.${i}` : i, rootData)
         if (_errors) {
           errors = [...errors, ..._errors]
         }
@@ -174,7 +175,7 @@ const Validate = (schema, value, path) => {
       }
       let dist = {}
       for (let [k, s] of Object.entries(schema.schema)) {
-        let [v, _errors] = Validate(s, value[k], path ? `${path}.${k}` : k)
+        let [v, _errors] = cvalidate(s, value[k], path ? `${path}.${k}` : k, rootData)
         if (_errors) {
           errors = [...errors, ..._errors]
         }
@@ -193,4 +194,4 @@ const Validate = (schema, value, path) => {
   return [value, errors]
 }
 
-module.exports = Validate
+module.exports = cvalidate
