@@ -1,6 +1,6 @@
 {
   "name": "c-validator",
-  "version": "5.3.3",
+  "version": "5.3.4",
   "description": "Validating and sanitizing data",
   "main": "./",
   "scripts": {
