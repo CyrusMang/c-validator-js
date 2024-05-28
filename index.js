@@ -157,12 +157,6 @@ const cvalidate = (schema, value, path, rootData) => {
       value = list
       break
     case 'dist':
-      if (typeof value !== 'object') {
-        errors.push({
-          path, message: '{name} is invalid'
-        })
-        break
-      }
       if (schema.condition) {
         for (let s of schema.condition.split('|')) {
           let n = s.split(':')
@@ -172,6 +166,15 @@ const cvalidate = (schema, value, path, rootData) => {
           }
           value = v
         }
+      }
+      if (value === null) {
+        break
+      }
+      if (typeof value !== 'object') {
+        errors.push({
+          path, message: '{name} is invalid'
+        })
+        break
       }
       let dist = {}
       for (let [k, s] of Object.entries(schema.schema)) {
