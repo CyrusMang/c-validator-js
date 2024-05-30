@@ -1,10 +1,10 @@
 {
   "name": "c-validator",
-  "version": "5.3.5",
+  "version": "6.3.5",
   "description": "Validating and sanitizing data",
   "main": "./",
   "scripts": {
-    "test": "./node_modules/.bin/jest --testPathPattern=./test.js"
+    "test": "jest --testPathPattern=./test.js"
   },
   "repository": {
     "type": "git",

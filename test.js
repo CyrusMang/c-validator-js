@@ -1,4 +1,4 @@
-const Validate = require('./')
+const CValidator = require('./')
 const raw = require('./raw')
 
 describe('validator', () => {
@@ -58,7 +58,8 @@ describe('validator', () => {
           }],
           isadmin: 'false',
         }
-        const [value, errors] = Validate(schema, data)
+        const cvalidater = new CValidator(schema)
+        const [_, errors] = cvalidater.check(data)
         expect(errors).toEqual([
           {
             path: 'slug',
@@ -106,7 +107,8 @@ describe('validator', () => {
           }],
           isadmin: 'false',
         }
-        const [value, errors] = Validate(schema, data)
+        const cvalidater = new CValidator(schema)
+        const [value, _] = cvalidater.check(data)
         expect(value).toEqual({
           name: 'Test',
           slug: 'name-test',

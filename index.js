@@ -1,119 +1,34 @@
-const moment = require('moment')
-const raw = require('./raw')
+const schemaFormatter = require('./schemaFormatter')
+const operators = require('./operators')
 
-const validaters = {
-  required: (path, value) => {
-    let errors = []
-    if (raw.validation.empty(value)) {
-      errors.push({
-        path,
-        message: '{name} is required',
-      })
+class CValidator {
+  constructor(schema) {
+    this.schema = schemaFormatter(schema)
+  }
+  check(data, path) {
+    let s = this.schema
+    if (path) {
+      s = findSchema(s, path)
     }
-    return [value, errors]
-  },
-  in: (path, value, args) => {
-    let errors = []
-    args = typeof args === 'string' ? args.split(',') : (args || [])
-    if (!raw.validation.empty(value)) {
-      if (!raw.validation.in(value, args)) {
-        errors.push({
-          path,
-          message: '{name} not in option',
-        })
-      }
-    }
-    return [value, errors]
-  },
-  slug: (path, value) => {
-    let errors = []
-    if (!raw.validation.empty(value)) {
-      if (typeof value !== 'string') {
-        errors.push({
-          path,
-          message: '{name} mush be string',
-        })
-      } else {
-        value = raw.sanitization.slug(value)
-      }
-    }
-    return [value, errors]
-  },
-  phone: (path, value) => {
-    let errors = []
-    if (!raw.validation.empty(value)) {
-      if (typeof value !== 'string' || !raw.validation.isPhone(value)) {
-        errors.push({
-          path,
-          message: '{name} not valid phone',
-        })
-      }
-    }
-    return [value, errors]
-  },
-  email: (path, value) => {
-    let errors = []
-    if (!raw.validation.empty(value)) {
-      if (typeof value !== 'string' || !raw.validation.isEmail(value)) {
-        errors.push({
-          path,
-          message: '{name} not valid email',
-        })
-      }
-    }
-    return [value, errors]
-  },
-  datetime: (path, value, args) => {
-    let errors = []
-    if (!raw.validation.empty(value)) {
-      const datetime = moment(value, args, true)
-      if (datetime.isValid()) {
-        value = datetime.format(args)
-      } else {
-        errors.push({
-          path,
-          message: '{name} not valid datetime',
-        })
-      }
-    }
-    return [value, errors]
-  },
-  integer: (path, value) => [raw.sanitization.toInteger(value), []],
-  float: (path, value) => [raw.sanitization.toFloat(value), []],
-  boolean: (path, value) => [raw.sanitization.toBoolean(value), []],
+    return checker(s, data, path)
+  }
 }
 
-const schemaFormat = schema => {
-  if (typeof schema === 'string') {
-    return {
-      _type: 'string',
-      condition: schema
-    }
-  } else if (Array.isArray(schema)) {
-    return {
-      _type: 'list',
-      item: schema.length ? schema[0] : '',
-    }
-  } else if (typeof schema === 'object') {
-    if (schema._type) {
-      return schema
-    }
-    return {
-      _type: 'dist',
-      schema: schema,
-    }
-  } else if (typeof schema === 'function') {
-    return {
-      _type: 'custom',
-      validation: schema,
+const findSchema = (schema, path) => {
+  let paths = path.split('.')
+  let s = schema
+  for (let p of paths) {
+    if (s._type === 'dist') {
+      s = s.schema[p]
+    } else if (s._type === 'list') {
+      s = s.item
     }
   }
-  throw new Error('Schema syntax error')
+  return s
 }
 
-const cvalidate = (schema, value, path, rootData) => {
-  schema = schemaFormat(schema)
-  rootData = rootData || value
+const checker = (schema, value, path) => {
+  schema = schemaFormatter(schema)
   
   let errors = []
   switch (schema._type) {
@@ -121,7 +36,7 @@ const cvalidate = (schema, value, path, rootData) => {
       if (schema.condition) {
         for (let s of schema.condition.split('|')) {
           let n = s.split(':')
-          let [v, _errors] = validaters[n[0]](path, value, n[1])
+          let [v, _errors] = operators[n[0]](path, value, n[1])
           if (_errors) {
             errors = [...errors, ..._errors]
           }
@@ -139,7 +54,7 @@ const cvalidate = (schema, value, path, rootData) => {
       if (schema.condition) {
         for (let s of schema.condition.split('|')) {
           let n = s.split(':')
-          let [v, _errors] = validaters[n[0]](path, value, n[1])
+          let [v, _errors] = operators[n[0]](path, value, n[1])
           if (_errors) {
             errors = [...errors, ..._errors]
           }
@@ -148,7 +63,7 @@ const cvalidate = (schema, value, path, rootData) => {
       }
       let list = []
       for (let [i, _value] of value.entries()) {
-        let [v, _errors] = cvalidate(schema.item, _value, path ? `${path}.${i}` : i, rootData)
+        let [v, _errors] = checker(schema.item, _value, path ? `${path}.${i}` : i)
         if (_errors) {
           errors = [...errors, ..._errors]
         }
@@ -160,7 +75,7 @@ const cvalidate = (schema, value, path, rootData) => {
       if (schema.condition) {
         for (let s of schema.condition.split('|')) {
           let n = s.split(':')
-          let [v, _errors] = validaters[n[0]](path, value, n[1])
+          let [v, _errors] = operators[n[0]](path, value, n[1])
           if (_errors) {
             errors = [...errors, ..._errors]
           }
@@ -178,7 +93,7 @@ const cvalidate = (schema, value, path, rootData) => {
       }
       let dist = {}
       for (let [k, s] of Object.entries(schema.schema)) {
-        let [v, _errors] = cvalidate(s, value[k], path ? `${path}.${k}` : k, rootData)
+        let [v, _errors] = checker(s, value[k], path ? `${path}.${k}` : k)
         if (_errors) {
           errors = [...errors, ..._errors]
         }
@@ -187,7 +102,7 @@ const cvalidate = (schema, value, path, rootData) => {
       value = dist
       break
     case 'custom':
-      let [v, _errors] = schema.validation(path, value, rootData)
+      let [v, _errors] = schema.validation(path, value)
       if (_errors) {
         errors = [...errors, ..._errors]
       }
@@ -197,4 +112,4 @@ const cvalidate = (schema, value, path, rootData) => {
   return [value, errors]
 }
 
-module.exports = cvalidate
+module.exports = CValidator
