@@ -15,7 +15,7 @@ class CValidator {
 }
 
 const findSchema = (schema, path) => {
-  let paths = path.split('.')
+  const paths = path.split('.')
   let s = schema
   for (let p of paths) {
     if (s._type === 'dist') {
